@@ -202,7 +202,15 @@ def handler(job):
     logger.info(f"Using {'FLF2V' if end_image_path_local else 'single'} workflow with {lora_count} LoRA pairs")
     
     prompt = load_workflow(workflow_file)
-    
+
+    # Force attention_mode to sdpa (PyTorch native) to avoid SageAttention
+    # FP8 CUDA kernel crashes on certain GPU architectures (e.g. RTX 4090 + cu128)
+    ATTENTION_MODE = os.getenv("ATTENTION_MODE", "sdpa")
+    for node_id, node in prompt.items():
+        if node.get("class_type") == "WanVideoModelLoader":
+            node["inputs"]["attention_mode"] = ATTENTION_MODE
+            logger.info(f"Node {node_id}: attention_mode forced to '{ATTENTION_MODE}'")
+
     length = job_input.get("length", 81)
     steps = job_input.get("steps", 10)
 
