@@ -115,6 +115,7 @@ def get_history(prompt_id):
 def get_videos(ws, prompt):
     prompt_id = queue_prompt(prompt)['prompt_id']
     output_videos = {}
+
     while True:
         out = ws.recv()
         if isinstance(out, str):
@@ -130,16 +131,31 @@ def get_videos(ws, prompt):
     for node_id in history['outputs']:
         node_output = history['outputs'][node_id]
         videos_output = []
-        if 'gifs' in node_output:
-            for video in node_output['gifs']:
-                # fullpath를 이용하여 직접 파일을 읽고 base64로 인코딩
-                with open(video['fullpath'], 'rb') as f:
-                    video_data = base64.b64encode(f.read()).decode('utf-8')
-                videos_output.append(video_data)
+
+        for bucket in ('videos', 'gifs'):
+            if bucket not in node_output:
+                continue
+
+            for media in node_output[bucket]:
+                fullpath = media.get('fullpath')
+                if fullpath and os.path.exists(fullpath):
+                    with open(fullpath, 'rb') as f:
+                        video_data = base64.b64encode(f.read()).decode('utf-8')
+                    videos_output.append(video_data)
+                    continue
+
+                filename = media.get('filename')
+                if filename:
+                    binary = get_image(
+                        filename,
+                        media.get('subfolder', ''),
+                        media.get('type', 'output')
+                    )
+                    videos_output.append(base64.b64encode(binary).decode('utf-8'))
+
         output_videos[node_id] = videos_output
 
     return output_videos
-
 def load_workflow(workflow_path):
     with open(workflow_path, 'r') as file:
         return json.load(file)
@@ -294,6 +310,6 @@ def handler(job):
         if videos[node_id]:
             return {"video": videos[node_id][0]}
     
-    return {"error": "비디오를를 찾을 수 없습니다."}
+    return {"error": "비디오를 찾을 수 없습니다."}
 
 runpod.serverless.start({"handler": handler})
