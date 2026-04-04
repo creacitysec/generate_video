@@ -5,7 +5,15 @@ set -e
 
 # Start ComfyUI in the background
 echo "Starting ComfyUI in the background..."
-python /ComfyUI/main.py --listen --use-sage-attention &
+# SageAttention can crash on certain GPU architectures (Ada/4090 + CUDA 12.8)
+# Use --use-sage-attention only if USE_SAGE_ATTENTION=1 is explicitly set
+if [ "${USE_SAGE_ATTENTION:-0}" = "1" ]; then
+    echo "SageAttention enabled via env var"
+    python /ComfyUI/main.py --listen --use-sage-attention &
+else
+    echo "Using default attention (sdpa)"
+    python /ComfyUI/main.py --listen &
+fi
 
 # Wait for ComfyUI to be ready
 echo "Waiting for ComfyUI to be ready..."
