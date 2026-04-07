@@ -13,7 +13,7 @@ RUN mkdir -p /comfyui/models/checkpoints && \
     wget -q --show-progress -O /comfyui/models/checkpoints/juggernaut_ragnarok.safetensors \
     "https://huggingface.co/RunDiffusion/Juggernaut-XL-v9/resolve/main/Juggernaut-XL_v9_RunDiffusionPhoto_v2.safetensors"
 
-# LoRAs
+# LoRAs (HuggingFace only — CivitAI requires auth, avoid)
 RUN mkdir -p /comfyui/models/loras
 
 # 1. Detail Tweaker XL (~223MB)
@@ -23,11 +23,3 @@ RUN wget -q --show-progress -O /comfyui/models/loras/add-detail-xl.safetensors \
 # 2. NSFW XL v2.0 (~665MB)
 RUN wget -q --show-progress -O /comfyui/models/loras/nsfw-xl.safetensors \
     "https://huggingface.co/Dremmar/nsfw-xl/resolve/main/nsfw-xl-2.0.safetensors"
-
-# 3. Adjust Details & Photorealism v9 ULTRA SDXL (~19MB)
-RUN wget -q --show-progress -O /comfyui/models/loras/adjust-photorealism.safetensors \
-    "https://civitai.com/api/download/models/2612595"
-
-# 4. NSFW POV All In One SDXL Mini (~74MB)
-RUN wget -q --show-progress -O /comfyui/models/loras/nsfw-pov-aio-mini.safetensors \
-    "https://civitai.com/api/download/models/162180"
