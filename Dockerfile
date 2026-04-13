@@ -9,7 +9,8 @@ RUN cd /comfyui/custom_nodes && \
     cd ComfyUI-PainterI2Vadvanced && (pip install -r requirements.txt 2>/dev/null || true)
 
 RUN cd /comfyui/custom_nodes && \
-    git clone https://github.com/vrgamegirl19/comfyui-vrgamedevgirl.git 2>/dev/null || true
+    git clone https://github.com/vrgamegirl19/comfyui-vrgamedevgirl.git && \
+    cd comfyui-vrgamedevgirl && pip install librosa
 
 # ── Provision script (downloads models to network volume on first cold start) ──
 COPY provision_video.sh /provision_video.sh
